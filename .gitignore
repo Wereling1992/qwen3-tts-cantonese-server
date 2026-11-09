@@ -1,0 +1,45 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv/
+venv/
+env/
+.env
+
+# Models & audio
+models/
+*.gguf
+*.wav
+*.mp3
+*.flac
+*.pcm
+*.ogg
+
+# Build / cache
+build/
+dist/
+*.egg-info/
+.cache/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+ggml/
+qwen3-tts.cpp/
+
+# IDE / OS
+.idea/
+.vscode/
+*.swp
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Local overrides
+docker-compose.override.yml
+.env.local
