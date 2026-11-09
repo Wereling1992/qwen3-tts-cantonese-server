@@ -4,21 +4,23 @@
 [![Docker Pulls](https://img.shields.io/docker/pulls/wereling1992/qwen3-tts-cantonese)](https://hub.docker.com/r/wereling1992/qwen3-tts-cantonese)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 
-香港粵語 **CPU-only** Text-to-Speech 服務，提供 OpenAI 兼容 API（`POST /v1/audio/speech`）。
+CPU-only **Hong Kong Cantonese** Text-to-Speech server with an OpenAI-compatible API (`POST /v1/audio/speech`).
+
+香港粵語 **CPU-only** TTS 服務，提供 OpenAI 兼容 API。
 
 - **Model**: [jmtl/hk-cantonese-cc0-qwen3-tts-GGUF](https://huggingface.co/jmtl/hk-cantonese-cc0-qwen3-tts-GGUF) (v0.0.5)
 - **Runtime**: [Danmoreng/qwen3-tts.cpp](https://github.com/Danmoreng/qwen3-tts.cpp)
 - **Endpoint**: `POST /v1/audio/speech`
 - **Port**: `3430`
 - **Auth**: API Key
-- **長文本**: 自動斷句（≤ 45 字）
+- **Long text**: auto-chunked (≤ 45 characters)
 
 **GitHub:** https://github.com/Wereling1992/qwen3-tts-cantonese-server  
 **Docker Hub:** [`wereling1992/qwen3-tts-cantonese`](https://hub.docker.com/r/wereling1992/qwen3-tts-cantonese)
 
 ---
 
-## Quick Start（推薦：直接 pull）
+## Quick Start (recommended: pull the image)
 
 ```bash
 docker run -d \
@@ -30,15 +32,17 @@ docker run -d \
   wereling1992/qwen3-tts-cantonese:latest
 ```
 
-首次啟動會自動下載模型（約 2.3 GB），之後會緩存在 volume `qwen3-tts-models`。
+The first start downloads the model (~2.3 GB) into the volume. Later starts reuse it.
 
-### 健康檢查
+首次啟動會自動下載模型（約 2.3 GB），之後會緩存在 volume。
+
+### Health check
 
 ```bash
 curl http://localhost:3430/health
 ```
 
-### 合成語音
+### Synthesize speech
 
 ```bash
 curl -X POST http://localhost:3430/v1/audio/speech \
@@ -74,7 +78,7 @@ with client.audio.speech.with_streaming_response.create(
 
 ---
 
-## docker compose（本機開發 / 自建）
+## docker compose (local build)
 
 ```bash
 git clone https://github.com/Wereling1992/qwen3-tts-cantonese-server.git
@@ -86,20 +90,20 @@ docker compose up -d --build
 
 ---
 
-## 推送到 Docker Hub
+## Push to Docker Hub
 
 ```bash
 docker login
 
-# 方法 1：用腳本
+# Option 1: helper script
 ./scripts/push-to-dockerhub.sh 1.0.0
 
-# 方法 2：手動
+# Option 2: manual
 docker build -t wereling1992/qwen3-tts-cantonese:latest .
 docker push wereling1992/qwen3-tts-cantonese:latest
 ```
 
-**推薦：用 buildx 出 amd64（大多數雲端主機）：**
+**Recommended: buildx for linux/amd64 (most cloud hosts):**
 
 ```bash
 docker buildx create --use --name multi 2>/dev/null || docker buildx use multi
@@ -108,7 +112,7 @@ docker buildx build --platform linux/amd64 \
   --push .
 ```
 
-> 建置時間較長（要編譯 C++），建議用有足夠 CPU / 記憶體的機器。
+> Build takes a while (C++ compilation). Use a machine with enough CPU and memory.
 
 ---
 
@@ -116,56 +120,56 @@ docker buildx build --platform linux/amd64 \
 
 ### `POST /v1/audio/speech`
 
-| 欄位 | 類型 | 預設 | 說明 |
-|------|------|------|------|
-| `model` | string | `hk-cantonese-cc0` | 任意字串（兼容用） |
-| `input` | string | **必填** | 要合成的文字（建議口語粵語） |
-| `voice` | string | `hk_voice_343` | 目前只支援這一個 baked speaker |
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `model` | string | `hk-cantonese-cc0` | Any string (for compatibility) |
+| `input` | string | **required** | Text to synthesize (colloquial Cantonese works best) |
+| `voice` | string | `hk_voice_343` | Only this baked speaker is supported |
 | `response_format` | string | `wav` | `wav` / `mp3` / `pcm` |
-| `speed` | float | `1.0` | 0.5–2.0（best-effort） |
-| `seed` | int | `20260905` | 可重現結果 |
-| `temperature` | float | `0.9` | 建議保持預設，太低容易 loop |
+| `speed` | float | `1.0` | 0.5–2.0 (best-effort) |
+| `seed` | int | `20260905` | Reproducible output |
+| `temperature` | float | `0.9` | Keep the default; too low can loop |
 
-**認證**（二選一）：
+**Auth** (either works):
 - `x-api-key: <key>`
 - `Authorization: Bearer <key>`
 
-### 其他端點
+### Other endpoints
 
-| 端點 | 說明 |
-|------|------|
-| `GET /health` | 健康檢查（無需認證） |
-| `GET /v1/models` | 列出模型 |
-| `GET /v1/voices` | 列出聲音 |
-
----
-
-## 環境變數
-
-| 變數 | 預設 | 說明 |
-|------|------|------|
-| `API_KEY` | `changeme` | API 金鑰（**請一定要改**） |
-| `REQUIRE_API_KEY` | `1` | 設為 `0` 可關閉認證 |
-| `SPEAKER` | `hk_voice_343` | 模型內建 speaker 名稱 |
-| `DEFAULT_SEED` | `20260905` | 預設隨機種子 |
-| `N_THREADS` | `0` | CPU 線程數（0 = 自動） |
-| `MAX_CHARS_PER_CHUNK` | `45` | 自動斷句最大字數 |
-| `PORT` | `3430` | 監聽埠 |
+| Endpoint | Description |
+|----------|-------------|
+| `GET /health` | Health check (no auth) |
+| `GET /v1/models` | List models |
+| `GET /v1/voices` | List voices |
 
 ---
 
-## 模型注意事項
+## Environment variables
 
-來自官方模型卡：
-
-- **自動斷句**：本服務已內建按 `，。：；！？` 斷句，單段 ≤ 45 字。
-- **採樣**：保持預設 temperature ≈ 0.9，避免 greedy。
-- **語言**：口語粵語效果最好；書面語容易讀錯。
-- **Voice clone**：此 GGUF 是 baked speaker，**不支援** reference audio 克隆。
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `API_KEY` | `changeme` | API key (**change this**) |
+| `REQUIRE_API_KEY` | `1` | Set to `0` to disable auth |
+| `SPEAKER` | `hk_voice_343` | Built-in speaker name |
+| `DEFAULT_SEED` | `20260905` | Default random seed |
+| `N_THREADS` | `0` | CPU threads (`0` = auto) |
+| `MAX_CHARS_PER_CHUNK` | `45` | Auto-chunk size |
+| `PORT` | `3430` | Listen port |
 
 ---
 
-## 專案結構
+## Model notes
+
+From the official model card:
+
+- **Chunking**: This server auto-splits on `，。：；！？`, max ~45 characters per chunk.
+- **Sampling**: Keep default temperature ≈ 0.9. Greedy / very low temperature can loop.
+- **Language**: Colloquial Cantonese works best; written Chinese mispronounces more often.
+- **Voice clone**: This GGUF uses a **baked speaker** — reference-audio cloning is **not** supported.
+
+---
+
+## Project layout
 
 ```
 qwen3-tts-cantonese-server/
@@ -182,8 +186,8 @@ qwen3-tts-cantonese-server/
 
 ---
 
-## 授權
+## License
 
-- 本服務程式碼：Apache-2.0
-- 底層模型：Apache-2.0 + 聲音為 CC-0
-- 使用時請遵守模型卡的 responsible use 指引（勿用作假冒真實人物等）
+- Server code: Apache-2.0
+- Underlying model: Apache-2.0 + voice under CC-0
+- Follow the model card’s responsible-use guidance (do not use for impersonation of real people, etc.)
