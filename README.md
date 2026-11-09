@@ -13,7 +13,6 @@ CPU-only **Hong Kong Cantonese** Text-to-Speech server with an OpenAI-compatible
 - **Auth**: API Key
 - **Long text**: auto-chunked (≤ 45 characters)
 
-**GitHub:** https://github.com/Wereling1992/qwen3-tts-cantonese-server  
 **Docker Hub:** [`wereling1992/qwen3-tts-cantonese`](https://hub.docker.com/r/wereling1992/qwen3-tts-cantonese)
 
 ---
