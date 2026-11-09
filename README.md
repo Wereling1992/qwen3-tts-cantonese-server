@@ -6,8 +6,6 @@
 
 CPU-only **Hong Kong Cantonese** Text-to-Speech server with an OpenAI-compatible API (`POST /v1/audio/speech`).
 
-香港粵語 **CPU-only** TTS 服務，提供 OpenAI 兼容 API。
-
 - **Model**: [jmtl/hk-cantonese-cc0-qwen3-tts-GGUF](https://huggingface.co/jmtl/hk-cantonese-cc0-qwen3-tts-GGUF) (v0.0.5)
 - **Runtime**: [Danmoreng/qwen3-tts.cpp](https://github.com/Danmoreng/qwen3-tts.cpp)
 - **Endpoint**: `POST /v1/audio/speech`
@@ -33,8 +31,6 @@ docker run -d \
 ```
 
 The first start downloads the model (~2.3 GB) into the volume. Later starts reuse it.
-
-首次啟動會自動下載模型（約 2.3 GB），之後會緩存在 volume。
 
 ### Health check
 
