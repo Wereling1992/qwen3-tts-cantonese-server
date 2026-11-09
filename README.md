@@ -86,32 +86,6 @@ docker compose up -d --build
 
 ---
 
-## Push to Docker Hub
-
-```bash
-docker login
-
-# Option 1: helper script
-./scripts/push-to-dockerhub.sh 1.0.0
-
-# Option 2: manual
-docker build -t wereling1992/qwen3-tts-cantonese:latest .
-docker push wereling1992/qwen3-tts-cantonese:latest
-```
-
-**Recommended: buildx for linux/amd64 (most cloud hosts):**
-
-```bash
-docker buildx create --use --name multi 2>/dev/null || docker buildx use multi
-docker buildx build --platform linux/amd64 \
-  -t wereling1992/qwen3-tts-cantonese:latest \
-  --push .
-```
-
-> Build takes a while (C++ compilation). Use a machine with enough CPU and memory.
-
----
-
 ## API
 
 ### `POST /v1/audio/speech`
